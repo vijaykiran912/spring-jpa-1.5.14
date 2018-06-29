@@ -8,12 +8,14 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.basics.springjpa.entity.AddressEntity;
 import com.basics.springjpa.entity.AuthorEntity;
 import com.basics.springjpa.entity.BooksEntity;
 import com.basics.springjpa.util.Utility;
@@ -168,10 +170,72 @@ public class BooksRepositoryImpl {
 		cq.where(cb.like(books.<String>get("title"), "%The%"));
 		Utility.printBooks(dataSourceEntityManager, cq, "CriteriaBuilder.like method");
 
+		// Using and, compound predicate methods
+		cq.where(cb.and(cb.like(books.get("title"), "%The%"), cb.between(books.get("seriesId"), 1, 3)));
+		Utility.printBooks(dataSourceEntityManager, cq, "CriteriaBuilder.and method");
+
+		// Using or, compound predicate methods
+		Predicate p1 = cb.like(books.get("title"), "%The%");
+		Predicate p2 = cb.between(books.get("seriesId"), 1, 3);
+		Predicate p1ORp2 = cb.or(p1, p2);
+		cq.where(p1ORp2);
+		Utility.printBooks(dataSourceEntityManager, cq, "CriteriaBuilder.or method");
 	}
 
 	/*
 	 * End of Restricting Criteria Query Results
 	 */
 
+	/*
+	 * Start of Managing Criteria Query Results
+	 */
+
+	/**
+	 * CriteriaQuery interface defines the orderBy, groupBy, having to order query
+	 * results, to group the results of a query together, to restrict those groups
+	 * according to a condition
+	 */
+	public void managingCriteriaQueryResults() {
+		/*orderBy();*/
+		groupingResults();
+	}
+
+	private void orderBy() {
+		CriteriaBuilder cb = dataSourceEntityManager.getCriteriaBuilder();
+		CriteriaQuery<BooksEntity> cq = cb.createQuery(BooksEntity.class);
+		Root<BooksEntity> books = cq.from(BooksEntity.class);
+
+		// Basic sorting
+		/*
+		 * cq.select(books).orderBy(cb.desc(books.get("seriesId")));
+		 * Utility.printBooks(dataSourceEntityManager, cq,
+		 * "CriteriaBuilder.orderBy method");
+		 */
+
+		// Sorting on child table columns
+		Join<AuthorEntity, AddressEntity> address = books.join("author").join("address");
+		cq.select(books).orderBy(cb.desc(address.get("country")), cb.asc(address.get("state")));
+		Utility.printBooks(dataSourceEntityManager, cq, "CriteriaBuilder.orderByChildTableColumns method");
+
+	}
+
+	/**
+	 * The CriteriaQuery.groupBy method partitions the query results into groups.
+	 * These groups are set by passing an expression to groupBy
+	 */
+	private void groupingResults() {
+
+		CriteriaBuilder cb = dataSourceEntityManager.getCriteriaBuilder();
+		CriteriaQuery<BooksEntity> cq = cb.createQuery(BooksEntity.class);
+		Root<BooksEntity> books = cq.from(BooksEntity.class);
+		Join<BooksEntity, AuthorEntity> author = books.join("author");
+
+		cq.groupBy(author.get("authorName"));
+		Utility.printBooks(dataSourceEntityManager, cq,
+				"CriteriaBuilder.groupingResults and sort by child property method");
+	}
+
+	/*
+	 * End of Managing Criteria Query Results
+	 */
 }

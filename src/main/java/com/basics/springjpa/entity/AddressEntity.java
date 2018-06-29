@@ -5,8 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -21,19 +19,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "author")
-public class AuthorEntity {
+@Table(name = "address")
+public class AddressEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "AuthorID")
-	private Long authorID;
+	@Column(name = "addressId")
+	private Long addressId;
 
-	@Column(name = "author_name")
-	private String authorName;
+	@Column(name = "country")
+	private String country;
 
-	@OneToOne
-	@JoinColumn(name = "address_id", updatable = false, insertable = false)
-	private AddressEntity address;
+	@Column(name = "state")
+	private String state;
+
+	@Column(name = "postal_code")
+	private String postalCode;
 
 }

@@ -88,5 +88,10 @@ public class BDSController {
 		booksRepositoryImpl.restrictingCriteriaQueryResults();
 		return "success";
 	}
-	
+
+	@RequestMapping(value = "/managingCriteriaQueryResults", method = RequestMethod.GET, headers = "Accept=text/plain")
+	public String managingCriteriaQueryResults() {
+		booksRepositoryImpl.managingCriteriaQueryResults();
+		return "success";
+	}
 }
